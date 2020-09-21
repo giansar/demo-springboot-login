@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demo Spring Boot</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700">
+    <link rel="stylesheet" th:href="@{~/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{~/css/tempusdominus-bootstrap-4.min.css}">
+    <link rel="stylesheet" th:href="@{~/css/icheck-bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{~/css/adminlte.min.css}">
+</head>
+<body class="hold-transition register-page">
+<div class="register-box">
+    <div class="register-logo">
+        <a href="/">Demo Spring Boot</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body register-card-body">
+            <p class="login-box-msg">Register a new membership</p>
+            <form>
+                <input id="_csrf" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="input-group mb-3">
+                    <input id="fullName" type="text" class="form-control" placeholder="Full name" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-user"></span>
+                        </div>
+                    </div>
+                    <div id="fullNameInvalid" class="invalid-feedback"></div>
+                </div>
+                <div class="input-group mb-3">
+                    <input id="email" type="email" class="form-control" placeholder="Email">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-envelope"></span>
+                        </div>
+                    </div>
+                    <div id="emailInvalid" class="invalid-feedback"></div>
+                </div>
+                <div class="input-group mb-3">
+                    <input id="password" type="password" class="form-control" placeholder="Password">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                    <div id="passwordInvalid" class="invalid-feedback"></div>
+                </div>
+                <div class="input-group mb-3">
+                    <input id="password1" type="password" class="form-control" placeholder="Retype password">
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                    <div id="password1Invalid" class="invalid-feedback"></div>
+                </div>
+                <div class="row">
+                    <div class="col-8">
+                        <div class="icheck-primary">
+                            <input type="checkbox" id="agreeTerms" name="terms">
+                            <label for="agreeTerms">
+                                I agree to the <a href="#">terms</a>
+                            </label>
+                            <div id="agreeTermsInvalid" class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <button id="btnRegistration" type="button" class="btn btn-primary btn-block">Register</button>
+                    </div>
+                </div>
+            </form>
+
+            <!--<div class="social-auth-links text-center">
+                <p>- OR -</p>
+                <a href="#" class="btn btn-block btn-primary">
+                    <i class="fab fa-facebook mr-2"></i>
+                    Sign up using Facebook
+                </a>
+                <a href="#" class="btn btn-block btn-danger">
+                    <i class="fab fa-google-plus mr-2"></i>
+                    Sign up using Google+
+                </a>
+            </div>-->
+
+            <a href="/login" class="text-center">I already have a membership</a>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{~/js/jquery.min.js}"></script>
+<script th:src="@{~/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{~/js/adminlte.min.js}"></script>
+<script>
+    $(function () {
+        $("#fullName").on("blur", function () {validateFullName($("#fullName").val().trim())});
+        $("#email").on("blur", function () {validateEmail($("#email").val().trim())});
+        $("#password").on("blur", function () {validatePassword($("#password").val().trim())});
+        $("#password1").on("blur", function () {validateRetypePassword($("#password").val().trim(),$("#password1").val().trim())});
+        $("#agreeTerms").on("click", function () {validateAgreeTerms($("#agreeTerms").prop("checked"))});
+        $("#btnRegistration").on("click", function () {
+            let v1 = validateFullName($("#fullName").val().trim());
+            let v2 = validateEmail($("#email").val().trim());
+            let v3 = validatePassword($("#password").val().trim());
+            let v4 = validateRetypePassword($("#password").val().trim(),$("#password1").val().trim());
+            let v5 = validateAgreeTerms($("#agreeTerms").prop("checked"));
+            if (!v1 || !v2 || !v3 || !v4 || !v5) {return;}
+            let d = {
+                fullName: $("#fullName").val(),
+                email: $("#email").val(),
+                password: $("#password").val(),
+                agreeTerms: v5
+            }
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:8080/api/register",
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(d),
+                dataType: "json",
+                headers: {
+                    "X-CSRF-TOKEN": $("#_csrf").val()
+                }
+            }).done(function (data) {
+                console.log(data);
+            });
+        });
+
+        function validateFullName(fullName) {
+            //let fullName = $("#fullName").val().trim();
+            if (fullName == null || fullName == "") {
+                $("#fullNameInvalid").text("please fill in the full name");
+                $("#fullName").addClass("is-invalid");
+                return false;
+            } else {
+                $("#fullName").removeClass("is-invalid");
+                return true;
+            }
+        }
+
+        function validateEmail(email) {
+            const regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            //let email = $("#email").val().trim();
+            if (email == null || email == "") {
+                $("#emailInvalid").text("please fill in the email");
+                $("#email").addClass("is-invalid");
+                return false;
+            } else if (!regex.test(email)) {
+                $("#emailInvalid").text("please fill in the email with valid format");
+                $("#email").addClass("is-invalid");
+                return false;
+            } else {
+                $("#email").removeClass("is-invalid");
+                return true;
+            }
+        }
+
+        function validatePassword(password) {
+            //let password = $("#password").val().trim();
+            if (password == null || password == "") {
+                $("#passwordInvalid").text("please fill in the password");
+                $("#password").addClass("is-invalid");
+                return false;
+            } else {
+                $("#password").removeClass("is-invalid");
+                return true;
+            }
+        }
+
+        function validateRetypePassword(password, password1) {
+            //let password = $("#password").val().trim();
+            //let password1 = $("#password1").val().trim();
+            if (password1 == null || password1 == "") {
+                $("#password1Invalid").text("please retype the password");
+                $("#password1").addClass("is-invalid");
+                return false;
+            } else if (password != password1) {
+                $("#password1Invalid").text("the retype password does not match with password");
+                $("#password1").addClass("is-invalid");
+                return false;
+            } else {
+                $("#password1").removeClass("is-invalid");
+                return true;
+            }
+        }
+
+        function validateAgreeTerms(agreeTerms) {
+            //const agreeTerms = $("#agreeTerms").val();
+            if (agreeTerms != true) {
+                $("#agreeTermsInvalid").text("You have to agree with the terms");
+                $("#agreeTerms").addClass("is-invalid");
+                return false;
+            } else {
+                $("#agreeTerms").removeClass("is-invalid");
+                return true;
+            }
+        }
+    });
+</script>
+</body>
+</html>

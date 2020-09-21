@@ -1,0 +1,1 @@
+INSERT INTO demo_login.member ("email", "full_name", "is_agree_terms") VALUES ('giansar.software.demo@gmail.com', 'Giansar', 'true');
